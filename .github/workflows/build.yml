@@ -1,0 +1,25 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - run: mvn --batch-mode --no-transfer-progress verify
+      - name: Smoke test same-process mode
+        run: timeout 15s mvn -q -DskipTests exec:java -Dexec.mainClass=com.vahan.assignment.app.SameProcessMain
+      - name: Smoke test separate-process mode
+        run: timeout 20s sh run.sh multi-process 5051
